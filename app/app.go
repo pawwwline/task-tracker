@@ -6,7 +6,7 @@ import (
 )
 
 type TaskService interface {
-	AddTask(task string)
+	AddTask(task string) int
 	UpdateTask(id int, task string)
 	DeleteTask(id int)
 	ListAllTasks() []models.Task

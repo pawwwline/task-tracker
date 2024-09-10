@@ -5,18 +5,30 @@ import (
 	"time"
 )
 
-var counter int
+//var counter int
 
-func (a *App) AddTask(task string) {
-	counter++
+func counter(fileTasks []models.Task) int {
+	var id int
+	for i, _ := range fileTasks {
+		if i == len(fileTasks)-1 {
+			id = fileTasks[i].Id
+		}
+	}
+	return id
+}
+
+func (a *App) AddTask(task string) int {
+	fileTasks := a.Storage.LoadInfo()
+	id := counter(fileTasks)
 	data := models.Task{
-		Id:          counter,
+		Id:          id + 1,
 		Description: task,
 		Status:      "todo",
 		CreatedAt:   time.Now(),
+		UpdatedAt:   "Not updated",
 	}
 	a.Storage.SaveInfo(data)
-
+	return id + 1
 }
 
 func (a *App) UpdateTask(id int, task string) {
@@ -36,6 +48,7 @@ func (a *App) DeleteTask(id int) {
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks = append(fileTasks[:i], fileTasks[i+1:]...)
+			break
 		}
 	}
 	a.Storage.UpdateInfo(fileTasks)
