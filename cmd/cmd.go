@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"task-tracker/app"
@@ -27,4 +28,15 @@ func (c Command) Table(listFunc ListFunc) {
 		fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\n", task.Id, task.Description, task.Status, task.CreatedAt, task.UpdatedAt)
 	}
 	w.Flush()
+}
+
+// CheckArguments check quantity of args
+func (c Command) CheckArguments(q int) error {
+	if q < len(os.Args) {
+		return errors.New("too many arguments")
+	} else if q > len(os.Args) {
+		return errors.New("too few arguments")
+	} else {
+		return nil
+	}
 }

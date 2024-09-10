@@ -7,15 +7,15 @@ import (
 
 type TaskService interface {
 	AddTask(task string) int
-	UpdateTask(id int, task string)
-	DeleteTask(id int)
+	UpdateTask(id int, task string) error
+	DeleteTask(id int) error
 	ListAllTasks() []models.Task
 	ListDoneTasks() []models.Task
 	ListProgressTasks() []models.Task
 	ListToDoTasks() []models.Task
-	MarkInProgress(id int)
-	MarkDone(id int)
-	MarkToDo(id int)
+	MarkInProgress(id int) error
+	MarkDone(id int) error
+	MarkToDo(id int) error
 }
 
 type App struct {

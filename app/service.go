@@ -1,9 +1,13 @@
 package app
 
 import (
+	"errors"
+	"task-tracker/lib/e"
 	"task-tracker/models"
 	"time"
 )
+
+const IDNotFound = "id of task is not found"
 
 func counter(fileTasks []models.Task) int {
 	var id int
@@ -29,27 +33,39 @@ func (a *App) AddTask(task string) int {
 	return id + 1
 }
 
-func (a *App) UpdateTask(id int, task string) {
+func (a *App) UpdateTask(id int, task string) error {
 	fileTasks := a.Storage.LoadInfo()
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Description = task
 			fileTasks[i].UpdatedAt = time.Now()
 			break
+		} else {
+			err := e.WrapError("ID error", errors.New(IDNotFound))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	a.Storage.UpdateInfo(fileTasks)
+	return nil
 }
 
-func (a *App) DeleteTask(id int) {
+func (a *App) DeleteTask(id int) error {
 	fileTasks := a.Storage.LoadInfo()
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks = append(fileTasks[:i], fileTasks[i+1:]...)
 			break
+		} else {
+			err := e.WrapError("ID error", errors.New(IDNotFound))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	a.Storage.UpdateInfo(fileTasks)
+	return nil
 }
 
 func (a *App) ListAllTasks() []models.Task {
@@ -90,38 +106,57 @@ func (a *App) ListProgressTasks() []models.Task {
 	return ProgressTasks
 }
 
-func (a *App) MarkInProgress(id int) {
+func (a *App) MarkInProgress(id int) error {
 	fileTasks := a.Storage.LoadInfo()
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "in-progress"
 			fileTasks[i].UpdatedAt = time.Now()
 			break
+		} else {
+			err := e.WrapError("ID error", errors.New(IDNotFound))
+			if err != nil {
+				return err
+			}
 		}
+
 	}
 	a.Storage.UpdateInfo(fileTasks)
+	return nil
 }
 
-func (a *App) MarkDone(id int) {
+func (a *App) MarkDone(id int) error {
 	fileTasks := a.Storage.LoadInfo()
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "done"
 			fileTasks[i].UpdatedAt = time.Now()
 			break
+		} else {
+			err := e.WrapError("ID error", errors.New(IDNotFound))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	a.Storage.UpdateInfo(fileTasks)
+	return nil
 }
 
-func (a *App) MarkToDo(id int) {
+func (a *App) MarkToDo(id int) error {
 	fileTasks := a.Storage.LoadInfo()
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "todo"
 			fileTasks[i].UpdatedAt = time.Now()
 			break
+		} else {
+			err := e.WrapError("ID error", errors.New(IDNotFound))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	a.Storage.UpdateInfo(fileTasks)
+	return nil
 }
