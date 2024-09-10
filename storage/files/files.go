@@ -2,6 +2,7 @@ package files
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"task-tracker/models"
@@ -9,11 +10,11 @@ import (
 
 type FileStorage struct {
 	Filename string
-	taskDB   []models.Task `json:"tasks"`
+	TaskDB   []models.Task
 }
 
 func NewFileStorage(filename string) *FileStorage {
-	return &FileStorage{Filename: filename, taskDB: make([]models.Task, 0)}
+	return &FileStorage{Filename: filename, TaskDB: make([]models.Task, 0)}
 }
 
 const (
@@ -22,23 +23,29 @@ const (
 
 func (fs *FileStorage) SaveInfo(data models.Task) {
 	fileData, err := os.ReadFile(fs.Filename)
-	if err != nil {
-		_, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+	if os.IsNotExist(err) {
+		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
 		if err != nil {
 			log.Fatalf("open file failed: %v", err)
 		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Fatalf("close file failed: %v", err)
+			}
+		}()
+
 	}
 
 	if len(fileData) > 0 {
-		err = json.Unmarshal(fileData, &fs.taskDB)
+		err = json.Unmarshal(fileData, &fs.TaskDB)
 		if err != nil {
 			log.Fatalf("parse file failed: %v", err)
 		}
 	}
 
-	fs.taskDB = append(fs.taskDB, data)
+	fs.TaskDB = append(fs.TaskDB, data)
 
-	jsonData, _ := json.MarshalIndent(fs.taskDB, "", "  ")
+	jsonData, _ := json.MarshalIndent(fs.TaskDB, "", "  ")
 
 	err = os.WriteFile(fs.Filename, jsonData, perm)
 	if err != nil {
@@ -48,18 +55,26 @@ func (fs *FileStorage) SaveInfo(data models.Task) {
 
 func (fs *FileStorage) LoadInfo() []models.Task {
 	fileData, err := os.ReadFile(fs.Filename)
-	if err != nil {
-		log.Fatalf("read file failed: %v", err)
+	if os.IsNotExist(err) {
+		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+		if err != nil {
+			log.Fatalf("open file failed: %v", err)
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				fmt.Println("Error closing file:", err)
+			}
+		}()
 	}
 
 	if len(fileData) > 0 {
-		err = json.Unmarshal(fileData, &fs.taskDB)
+		err = json.Unmarshal(fileData, &fs.TaskDB)
 		if err != nil {
 			log.Fatalf("parse file failed: %v", err)
 		}
 	}
 
-	return fs.taskDB
+	return fs.TaskDB
 }
 
 func (fs *FileStorage) UpdateInfo(data []models.Task) {
