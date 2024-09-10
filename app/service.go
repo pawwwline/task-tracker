@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-//var counter int
-
 func counter(fileTasks []models.Task) int {
 	var id int
 	for i, _ := range fileTasks {
