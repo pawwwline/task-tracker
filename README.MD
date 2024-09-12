@@ -14,7 +14,7 @@ Simple command line task management app. Implemented in Goland and uses JSON fil
 
 - Ensure you have Golang installed
 
-1. Clone repisitory:
+1. Clone repository:
 ```bash
 git clone https://github.com/pawwwline/task-tracker
 ```
