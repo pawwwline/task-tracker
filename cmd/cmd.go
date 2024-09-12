@@ -11,18 +11,22 @@ import (
 )
 
 type CLI interface {
-	Cmd()
+	Cmd() error
 	Table(listFunc ListFunc)
+	CheckArguments(int) error
 }
 
 type Command struct {
 	App app.App
 }
 
-type ListFunc func() []models.Task
+type ListFunc func() ([]models.Task, error)
 
 func (c Command) Table(listFunc ListFunc) {
-	taskFile := listFunc()
+	taskFile, err := listFunc()
+	if err != nil {
+		fmt.Println(err)
+	}
 	if taskFile == nil {
 		fmt.Println(color.Yellow + "No tasks found." + color.Reset)
 	} else {

@@ -1,16 +1,18 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"task-tracker/app"
 	"task-tracker/lib/e"
 )
 
 const (
 	ErrArgumentCount = "argument count error"
-	InvalidCmd       = "Invalid command"
+	InvalidCmd       = "invalid command"
 )
 
 var (
@@ -20,7 +22,7 @@ var (
 func getId(arg string) (int, error) {
 	id, err := strconv.Atoi(arg)
 	if err != nil {
-		return 0, e.WrapError("error parsing id", err)
+		return 0, err
 	}
 	return id, nil
 }
@@ -36,14 +38,20 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
-		id := c.App.AddTask(os.Args[2])
+		id, err := c.App.AddTask(os.Args[2])
+		if err != nil {
+			return err
+		}
 		fmt.Printf("Task added successfully (ID: %d)", id)
 	case "update":
 		err := c.CheckArguments(4)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
-		id, _ := getId(os.Args[2])
+		id, err := getId(os.Args[2])
+		if err != nil {
+			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
+		}
 		err = c.App.UpdateTask(id, os.Args[3])
 		if err != nil {
 			return err
@@ -53,7 +61,10 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
-		id, _ := getId(os.Args[2])
+		id, err := getId(os.Args[2])
+		if err != nil {
+			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
+		}
 		err = c.App.DeleteTask(id)
 		if err != nil {
 			return err
@@ -70,8 +81,12 @@ func (c Command) Cmd() error {
 			case "todo":
 				c.Table(c.App.ListToDoTasks)
 			default:
-				fmt.Println("Invalid command")
-				fmt.Printf("Try:\n-'todo';\n-'in-progress;\n-'done';\n")
+				err := e.WrapError(strings.Join(os.Args, " "), errors.New(InvalidCmd))
+				if err != nil {
+					fmt.Printf("Try:\n-'todo';\n-'in-progress;\n-'done';\n")
+				}
+				return err
+
 			}
 		} else {
 			err := c.CheckArguments(2)
@@ -85,7 +100,10 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
-		id, _ := getId(os.Args[2])
+		id, err := getId(os.Args[2])
+		if err != nil {
+			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
+		}
 		err = c.App.MarkInProgress(id)
 		if err != nil {
 			return err
@@ -105,15 +123,21 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
-		id, _ := getId(os.Args[2])
+		id, err := getId(os.Args[2])
+		if err != nil {
+			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
+		}
 		err = c.App.MarkToDo(id)
 		if err != nil {
 			return err
 		}
 
 	default:
-		fmt.Fprintf(os.Stderr, "\033[31m"+"Invalid command"+"\033[0m\n")
-		fmt.Printf("List of commands:\n\033[34madd <«your_task»> \nupdate <task_id> <«your_task»>\ndelete <task_id>\nmark-in-progress <task_id>\nmark-done <task-id>\nmark-todo <task-id>\nlist #will list all tasks\nlist done \nlist todo\nlist in-progress\u001B[0m")
+		err := e.WrapError(strings.Join(os.Args, " "), errors.New(InvalidCmd))
+		if err != nil {
+			fmt.Printf("List of commands:\n\033[34madd <«your_task»> \nupdate <task_id> <«your_task»>\ndelete <task_id>\nmark-in-progress <task_id>\nmark-done <task-id>\nmark-todo <task-id>\nlist #will list all tasks\nlist done \nlist todo\nlist in-progress\u001B[0m\n")
+		}
+		return err
 	}
 	return nil
 }
