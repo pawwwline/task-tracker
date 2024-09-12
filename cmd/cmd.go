@@ -12,7 +12,7 @@ import (
 
 type CLI interface {
 	Cmd() error
-	Table(listFunc ListFunc)
+	Table(listFunc ListFunc) error
 	CheckArguments(int) error
 }
 
@@ -22,10 +22,10 @@ type Command struct {
 
 type ListFunc func() ([]models.Task, error)
 
-func (c Command) Table(listFunc ListFunc) {
+func (c Command) Table(listFunc ListFunc) error {
 	taskFile, err := listFunc()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	if taskFile == nil {
 		fmt.Println(color.Yellow + "No tasks found." + color.Reset)
@@ -37,7 +37,7 @@ func (c Command) Table(listFunc ListFunc) {
 		}
 		w.Flush()
 	}
-
+	return nil
 }
 
 // CheckArguments check quantity of args
