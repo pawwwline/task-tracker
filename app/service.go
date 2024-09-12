@@ -19,8 +19,11 @@ func counter(fileTasks []models.Task) int {
 	return id
 }
 
-func (a *App) AddTask(task string) int {
-	fileTasks := a.Storage.LoadInfo()
+func (a *App) AddTask(task string) (int, error) {
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return -1, err
+	}
 	id := counter(fileTasks)
 	data := models.Task{
 		Id:          id + 1,
@@ -29,12 +32,18 @@ func (a *App) AddTask(task string) int {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   "Not updated",
 	}
-	a.Storage.SaveInfo(data)
-	return id + 1
+	err = a.Storage.SaveInfo(data)
+	if err != nil {
+		return -1, err
+	}
+	return id + 1, nil
 }
 
 func (a *App) UpdateTask(id int, task string) error {
-	fileTasks := a.Storage.LoadInfo()
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return err
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Description = task
@@ -47,12 +56,18 @@ func (a *App) UpdateTask(id int, task string) error {
 			}
 		}
 	}
-	a.Storage.UpdateInfo(fileTasks)
+	err = a.Storage.UpdateInfo(fileTasks)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (a *App) DeleteTask(id int) error {
-	fileTasks := a.Storage.LoadInfo()
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return err
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks = append(fileTasks[:i], fileTasks[i+1:]...)
@@ -64,50 +79,68 @@ func (a *App) DeleteTask(id int) error {
 			}
 		}
 	}
-	a.Storage.UpdateInfo(fileTasks)
+	err = a.Storage.UpdateInfo(fileTasks)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func (a *App) ListAllTasks() []models.Task {
-	fileTasks := a.Storage.LoadInfo()
-	return fileTasks
+func (a *App) ListAllTasks() ([]models.Task, error) {
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return nil, err
+	}
+	return fileTasks, nil
 }
 
-func (a *App) ListDoneTasks() []models.Task {
-	fileTasks := a.Storage.LoadInfo()
+func (a *App) ListDoneTasks() ([]models.Task, error) {
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return nil, err
+	}
 	var doneTasks []models.Task
 	for i, _ := range fileTasks {
 		if fileTasks[i].Status == "done" {
 			doneTasks = append(doneTasks, fileTasks[i])
 		}
 	}
-	return doneTasks
+	return doneTasks, nil
 }
 
-func (a *App) ListToDoTasks() []models.Task {
-	fileTasks := a.Storage.LoadInfo()
+func (a *App) ListToDoTasks() ([]models.Task, error) {
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return nil, err
+	}
 	var toDoTasks []models.Task
 	for i, _ := range fileTasks {
 		if fileTasks[i].Status == "todo" {
 			toDoTasks = append(toDoTasks, fileTasks[i])
 		}
 	}
-	return toDoTasks
+	return toDoTasks, nil
 }
 
-func (a *App) ListProgressTasks() []models.Task {
-	fileTasks := a.Storage.LoadInfo()
+func (a *App) ListProgressTasks() ([]models.Task, error) {
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return nil, err
+	}
 	var ProgressTasks []models.Task
 	for i, _ := range fileTasks {
 		if fileTasks[i].Status == "in-progress" {
 			ProgressTasks = append(ProgressTasks, fileTasks[i])
 		}
 	}
-	return ProgressTasks
+	return ProgressTasks, nil
 }
 
 func (a *App) MarkInProgress(id int) error {
-	fileTasks := a.Storage.LoadInfo()
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return err
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "in-progress"
@@ -121,12 +154,18 @@ func (a *App) MarkInProgress(id int) error {
 		}
 
 	}
-	a.Storage.UpdateInfo(fileTasks)
+	err = a.Storage.UpdateInfo(fileTasks)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (a *App) MarkDone(id int) error {
-	fileTasks := a.Storage.LoadInfo()
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return err
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "done"
@@ -139,12 +178,18 @@ func (a *App) MarkDone(id int) error {
 			}
 		}
 	}
-	a.Storage.UpdateInfo(fileTasks)
+	err = a.Storage.UpdateInfo(fileTasks)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (a *App) MarkToDo(id int) error {
-	fileTasks := a.Storage.LoadInfo()
+	fileTasks, err := a.Storage.LoadInfo()
+	if err != nil {
+		return err
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "todo"
@@ -157,6 +202,9 @@ func (a *App) MarkToDo(id int) error {
 			}
 		}
 	}
-	a.Storage.UpdateInfo(fileTasks)
+	err = a.Storage.UpdateInfo(fileTasks)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -6,13 +6,13 @@ import (
 )
 
 type TaskService interface {
-	AddTask(task string) int
+	AddTask(task string) (int, error)
 	UpdateTask(id int, task string) error
 	DeleteTask(id int) error
-	ListAllTasks() []models.Task
-	ListDoneTasks() []models.Task
-	ListProgressTasks() []models.Task
-	ListToDoTasks() []models.Task
+	ListAllTasks() ([]models.Task, error)
+	ListDoneTasks() ([]models.Task, error)
+	ListProgressTasks() ([]models.Task, error)
+	ListToDoTasks() ([]models.Task, error)
 	MarkInProgress(id int) error
 	MarkDone(id int) error
 	MarkToDo(id int) error
