@@ -27,7 +27,7 @@ func (c Command) Table(listFunc ListFunc) error {
 	if err != nil {
 		return err
 	}
-	if taskFile == nil {
+	if taskFile == nil || len(taskFile) == 0 {
 		fmt.Println(color.Yellow + "No tasks found." + color.Reset)
 	} else {
 		w := tabwriter.NewWriter(os.Stdout, 0, 20, 1, ' ', tabwriter.Debug)

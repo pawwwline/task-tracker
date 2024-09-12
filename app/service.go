@@ -68,6 +68,9 @@ func (a *App) DeleteTask(id int) error {
 	if err != nil {
 		return err
 	}
+	if len(fileTasks) == 0 {
+		return errors.New("task list is empty")
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks = append(fileTasks[:i], fileTasks[i+1:]...)
@@ -141,6 +144,9 @@ func (a *App) MarkInProgress(id int) error {
 	if err != nil {
 		return err
 	}
+	if len(fileTasks) == 0 {
+		return errors.New("task list is empty")
+	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "in-progress"
@@ -166,6 +172,10 @@ func (a *App) MarkDone(id int) error {
 	if err != nil {
 		return err
 	}
+	if len(fileTasks) == 0 {
+		return errors.New("task list is empty")
+	}
+
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
 			fileTasks[i].Status = "done"
@@ -189,6 +199,9 @@ func (a *App) MarkToDo(id int) error {
 	fileTasks, err := a.Storage.LoadInfo()
 	if err != nil {
 		return err
+	}
+	if len(fileTasks) == 0 {
+		return errors.New("task list is empty")
 	}
 	for i, _ := range fileTasks {
 		if fileTasks[i].Id == id {
