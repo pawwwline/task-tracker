@@ -5,10 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="14450ded-9ca0-4b56-9a92-f3a3bf47a4c7" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/task-tracker.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/app_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/cmd.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/cmd.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/cmd_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/cmd_handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/type.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/type.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/storage/files/files.go" beforeDir="false" afterPath="$PROJECT_DIR$/storage/files/files.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/storage/storage.go" beforeDir="false" afterPath="$PROJECT_DIR$/storage/storage.go" afterDir="false" />
@@ -76,7 +78,7 @@
       <recent name="$PROJECT_DIR$/storage/files" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.go test task-tracker/app">
+  <component name="RunManager" selected="Go Build.go build task-tracker">
     <configuration name="go build scratch.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="task-tracker" />
       <working_directory value="$PROJECT_DIR$" />
@@ -131,10 +133,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build task-tracker" />
         <item itemvalue="Go Test.go test task-tracker/app" />
         <item itemvalue="Go Test.go test task-tracker/app_test" />
         <item itemvalue="Go Test.TestUpdateTask in task-tracker/app_test" />
-        <item itemvalue="Go Build.go build task-tracker" />
         <item itemvalue="Go Build.go build scratch.go" />
       </list>
     </recent_temporary>
