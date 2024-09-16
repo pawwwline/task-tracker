@@ -10,18 +10,14 @@ type TaskService interface {
 	UpdateTask(id int, task string) error
 	DeleteTask(id int) error
 	ListAllTasks() ([]models.Task, error)
-	ListDoneTasks() ([]models.Task, error)
-	ListProgressTasks() ([]models.Task, error)
-	ListToDoTasks() ([]models.Task, error)
-	MarkInProgress(id int) error
-	MarkDone(id int) error
-	MarkToDo(id int) error
+	ListByStatus(status models.TaskStatus) ([]models.Task, error)
+	MarkTask(id int, status models.TaskStatus) error
 }
 
 type App struct {
-	Storage storage.Storage
+	Storage storage.Repo
 }
 
-func NewApp(storage storage.Storage) *App {
+func NewApp(storage storage.Repo) *App {
 	return &App{Storage: storage}
 }
