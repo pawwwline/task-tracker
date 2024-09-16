@@ -8,6 +8,7 @@ import (
 	"strings"
 	"task-tracker/app"
 	"task-tracker/lib/e"
+	"task-tracker/models"
 )
 
 const (
@@ -34,7 +35,7 @@ func NewCmd(App *app.App) *Command {
 func (c Command) Cmd() error {
 	switch arg {
 	case "add":
-		err := c.CheckArguments(3)
+		err := c.CheckArgumentsLength(3)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
@@ -44,7 +45,7 @@ func (c Command) Cmd() error {
 		}
 		fmt.Printf("Task added successfully (ID: %d)", id)
 	case "update":
-		err := c.CheckArguments(4)
+		err := c.CheckArgumentsLength(4)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
@@ -57,7 +58,7 @@ func (c Command) Cmd() error {
 			return err
 		}
 	case "delete":
-		err := c.CheckArguments(3)
+		err := c.CheckArgumentsLength(3)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
@@ -74,12 +75,15 @@ func (c Command) Cmd() error {
 		length := len(os.Args)
 		if length == 3 {
 			switch os.Args[2] {
-			case "done":
-				c.Table(c.App.ListDoneTasks)
-			case "in-progress":
-				c.Table(c.App.ListProgressTasks)
-			case "todo":
-				c.Table(c.App.ListToDoTasks)
+			case string(models.StatusDone):
+				tasks, _ := c.App.ListByStatus(models.StatusDone)
+				c.Table(tasks)
+			case string(models.StatusInProgress):
+				tasks, _ := c.App.ListByStatus(models.StatusInProgress)
+				c.Table(tasks)
+			case string(models.StatusTodo):
+				tasks, _ := c.App.ListByStatus(models.StatusTodo)
+				c.Table(tasks)
 			default:
 				err := e.WrapError(strings.Join(os.Args, " "), errors.New(InvalidCmd))
 				if err != nil {
@@ -89,14 +93,15 @@ func (c Command) Cmd() error {
 
 			}
 		} else {
-			err := c.CheckArguments(2)
+			err := c.CheckArgumentsLength(2)
 			if err != nil {
 				return e.WrapError(ErrArgumentCount, err)
 			}
-			c.Table(c.App.ListAllTasks)
+			tasks, _ := c.App.ListAllTasks()
+			c.Table(tasks)
 		}
 	case "mark-in-progress":
-		err := c.CheckArguments(3)
+		err := c.CheckArgumentsLength(3)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
@@ -104,22 +109,22 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
 		}
-		err = c.App.MarkInProgress(id)
+		err = c.App.MarkTask(id, models.StatusInProgress)
 		if err != nil {
 			return err
 		}
 	case "mark-done":
-		err := c.CheckArguments(3)
+		err := c.CheckArgumentsLength(3)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
 		id, _ := getId(os.Args[2])
-		err = c.App.MarkDone(id)
+		err = c.App.MarkTask(id, models.StatusDone)
 		if err != nil {
 			return err
 		}
 	case "mark-todo":
-		err := c.CheckArguments(3)
+		err := c.CheckArgumentsLength(3)
 		if err != nil {
 			return e.WrapError(ErrArgumentCount, err)
 		}
@@ -127,7 +132,7 @@ func (c Command) Cmd() error {
 		if err != nil {
 			return e.WrapError(fmt.Sprintf(" '%s' is not a number", os.Args[2]), err)
 		}
-		err = c.App.MarkToDo(id)
+		err = c.App.MarkTask(id, models.StatusTodo)
 		if err != nil {
 			return err
 		}

@@ -12,36 +12,47 @@ import (
 
 type CLI interface {
 	Cmd() error
-	Table(listFunc ListFunc) error
-	CheckArguments(int) error
+	Table(tasks models.Task) error
+	CheckArgumentsLength(int) error
 }
 
 type Command struct {
 	App app.App
 }
 
-type ListFunc func() ([]models.Task, error)
-
-func (c Command) Table(listFunc ListFunc) error {
-	taskFile, err := listFunc()
-	if err != nil {
-		return err
-	}
-	if taskFile == nil || len(taskFile) == 0 {
+func (c Command) Table(tasks []models.Task) error {
+	const (
+		idWidth      = 5
+		descWidth    = 30
+		statusWidth  = 15
+		createdWidth = 25
+		updatedWidth = 25
+	)
+	if tasks == nil || len(tasks) == 0 {
 		fmt.Println(color.Yellow + "No tasks found." + color.Reset)
 	} else {
-		w := tabwriter.NewWriter(os.Stdout, 0, 20, 1, ' ', tabwriter.Debug)
-		fmt.Fprintln(w, "ID\tDESCRIPTION\tSTATUS\tCREATED\tUPDATED")
-		for _, task := range taskFile {
-			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\n", task.Id, task.Description, task.Status, task.CreatedAt, task.UpdatedAt)
+		w := tabwriter.NewWriter(os.Stdout, 10, 10, 2, ' ', tabwriter.Debug)
+		fmt.Fprintf(w, fmt.Sprintf("%%-%ds\t%%-%ds\t%%-%ds\t%%-%ds\t%%-%ds\n", idWidth, descWidth, statusWidth, createdWidth, updatedWidth),
+			"ID", "DESCRIPTION", "STATUS", "CREATED", "UPDATED")
+		for _, task := range tasks {
+			switch task.Status {
+			case models.StatusDone:
+				task.Status = color.Green + models.StatusDone + color.Reset
+			case models.StatusTodo:
+				task.Status = color.Magenta + models.StatusTodo + color.Reset
+			case models.StatusInProgress:
+				task.Status = color.Blue + models.StatusInProgress + color.Reset
+			}
+			fmt.Fprintf(w, fmt.Sprintf("%%-%dd\t%%-%ds\t%%-%ds\t%%-%ds\t%%-%ds\n", idWidth, descWidth, statusWidth, createdWidth, updatedWidth),
+				task.Id, task.Description, task.Status, task.CreatedAt.Format("2006-01-02 15:04:05"), task.UpdatedAt)
 		}
-		w.Flush()
+		return w.Flush()
 	}
 	return nil
 }
 
-// CheckArguments check quantity of args
-func (c Command) CheckArguments(q int) error {
+// CheckArgumentsLength check quantity of args
+func (c Command) CheckArgumentsLength(q int) error {
 	if q < len(os.Args) {
 		return errors.New("too many arguments")
 	} else if q > len(os.Args) {
