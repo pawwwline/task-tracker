@@ -10,18 +10,19 @@ import (
 
 type FileStorage struct {
 	Filename string
-	TaskDB   []models.Task
+	TaskDB   map[int]models.Task
+	Tasks    []models.Task
 }
 
 func NewFileStorage(filename string) *FileStorage {
-	return &FileStorage{Filename: filename, TaskDB: make([]models.Task, 0)}
+	return &FileStorage{Filename: filename, TaskDB: make(map[int]models.Task)}
 }
 
 const (
 	perm = 0754
 )
 
-func (fs *FileStorage) SaveInfo(data models.Task) error {
+func (fs *FileStorage) Save(data models.Task) error {
 	fileData, err := os.ReadFile(fs.Filename)
 	if os.IsNotExist(err) {
 		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
@@ -59,7 +60,7 @@ func (fs *FileStorage) SaveInfo(data models.Task) error {
 	return nil
 }
 
-func (fs *FileStorage) LoadInfo() ([]models.Task, error) {
+func (fs *FileStorage) GetAll() ([]models.Task, error) {
 	fileData, err := os.ReadFile(fs.Filename)
 	if os.IsNotExist(err) {
 		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
@@ -82,24 +83,4 @@ func (fs *FileStorage) LoadInfo() ([]models.Task, error) {
 	}
 
 	return fs.TaskDB, nil
-}
-
-func (fs *FileStorage) UpdateInfo(data []models.Task) error {
-	_, err := os.ReadFile(fs.Filename)
-	if err != nil {
-		if os.IsNotExist(err) {
-			log.Printf("file %s not found", fs.Filename)
-			return err
-		}
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return e.WrapError("json marshal failed", err)
-	}
-	err = os.WriteFile(fs.Filename, jsonData, perm)
-	if err != nil {
-		log.Fatalf("write file failed: %v", err)
-		return err
-	}
-	return nil
 }

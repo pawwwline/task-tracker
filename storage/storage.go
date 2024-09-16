@@ -3,7 +3,9 @@ package storage
 import "task-tracker/models"
 
 type Storage interface {
-	SaveInfo(task models.Task) error
-	LoadInfo() ([]models.Task, error)
-	UpdateInfo([]models.Task) error
+	AddTask(task string) error
+	DeleteTask(id string) error
+	GetAll() ([]models.Task, error)
+	GetByStatus(status string) ([]models.Task, error)
+	MarkTask(id string) error
 }
