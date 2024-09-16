@@ -2,16 +2,18 @@ package files
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"task-tracker/lib/e"
 	"task-tracker/models"
+	"time"
 )
 
 type FileStorage struct {
 	Filename string
 	TaskDB   map[int]models.Task
-	Tasks    []models.Task
 }
 
 func NewFileStorage(filename string) *FileStorage {
@@ -22,7 +24,7 @@ const (
 	perm = 0754
 )
 
-func (fs *FileStorage) Save(data models.Task) error {
+func (fs *FileStorage) LoadFile() error {
 	fileData, err := os.ReadFile(fs.Filename)
 	if os.IsNotExist(err) {
 		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
@@ -35,23 +37,23 @@ func (fs *FileStorage) Save(data models.Task) error {
 				log.Fatalf("close file failed: %v", err)
 			}
 		}()
-
 	}
-
+	fs.TaskDB = make(map[int]models.Task)
 	if len(fileData) > 0 {
 		err = json.Unmarshal(fileData, &fs.TaskDB)
 		if err != nil {
 			return e.WrapError("parse file failed", err)
 		}
+		fmt.Println(&fs.TaskDB)
 	}
+	return nil
+}
 
-	fs.TaskDB = append(fs.TaskDB, data)
-
-	jsonData, err := json.MarshalIndent(fs.TaskDB, "", "  ")
+func (fs *FileStorage) SaveFile(data map[int]models.Task) error {
+	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return e.WrapError("json marshal failed", err)
 	}
-
 	err = os.WriteFile(fs.Filename, jsonData, perm)
 	if err != nil {
 		log.Fatalf("write file failed: %v", err)
@@ -60,27 +62,98 @@ func (fs *FileStorage) Save(data models.Task) error {
 	return nil
 }
 
+func (fs *FileStorage) AddTask(task string) (int, error) {
+	err := fs.LoadFile()
+	if err != nil {
+		return 0, err
+	}
+	data := models.Task{
+		Id:          len(fs.TaskDB) + 1,
+		Description: task,
+		Status:      models.StatusTodo,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   "Not updated",
+	}
+	fs.TaskDB[data.Id] = data
+	fmt.Println(fs.TaskDB)
+	if err := fs.SaveFile(fs.TaskDB); err != nil {
+		return -1, e.WrapError("save task failed", err)
+	}
+	return data.Id, nil
+}
+
+func (fs *FileStorage) DeleteTask(id int) error {
+	err := fs.LoadFile()
+	if err != nil {
+		return err
+	}
+	if _, ok := fs.TaskDB[id]; ok {
+		delete(fs.TaskDB, id)
+		if err := fs.SaveFile(fs.TaskDB); err != nil {
+			return e.WrapError("delete task failed", err)
+		}
+	} else {
+		return errors.New("ID not found")
+	}
+	return nil
+}
+
+func (fs *FileStorage) UpdateTask(id int, task string) error {
+	err := fs.LoadFile()
+	if err != nil {
+		return err
+	}
+	if curTask, ok := fs.TaskDB[id]; ok {
+		curTask.Description = task
+		curTask.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+		fs.TaskDB[id] = curTask
+		if err := fs.SaveFile(fs.TaskDB); err != nil {
+			return e.WrapError("update task failed", err)
+		}
+	} else {
+		return errors.New("ID not found")
+	}
+	return nil
+}
+
 func (fs *FileStorage) GetAll() ([]models.Task, error) {
-	fileData, err := os.ReadFile(fs.Filename)
-	if os.IsNotExist(err) {
-		f, err := os.OpenFile(fs.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
-		if err != nil {
-			log.Fatalf("open file failed: %v", err)
-			return nil, err
-		}
-		defer func() {
-			if err := f.Close(); err != nil {
-				log.Fatalf("close file failed: %v", err)
-			}
-		}()
+	if err := fs.LoadFile(); err != nil {
+		return nil, err
 	}
+	var tasks []models.Task
+	for _, task := range fs.TaskDB {
+		tasks = append(tasks, task)
+	}
+	return tasks, nil
+}
 
-	if len(fileData) > 0 {
-		err = json.Unmarshal(fileData, &fs.TaskDB)
-		if err != nil {
-			return nil, e.WrapError("parse file failed", err)
+func (fs *FileStorage) GetByStatus(status models.TaskStatus) ([]models.Task, error) {
+	if err := fs.LoadFile(); err != nil {
+		return nil, err
+	}
+	var tasks []models.Task
+	for _, task := range fs.TaskDB {
+		if task.Status == status {
+			tasks = append(tasks, task)
 		}
 	}
+	return tasks, nil
+}
 
-	return fs.TaskDB, nil
+func (fs *FileStorage) MarkTask(id int, status models.TaskStatus) error {
+	err := fs.LoadFile()
+	if err != nil {
+		return err
+	}
+	if curTask, ok := fs.TaskDB[id]; ok {
+		curTask.Status = status
+		curTask.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+		fs.TaskDB[id] = curTask
+		if err := fs.SaveFile(fs.TaskDB); err != nil {
+			return e.WrapError("update task failed", err)
+		}
+	} else {
+		return errors.New("ID not found")
+	}
+	return nil
 }
